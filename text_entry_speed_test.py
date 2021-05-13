@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
 import sys
-from PyQt5 import QtCore, QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout
 
-from text_input_technique import EnhanceInput
+from text_input_technique import EnhanceInput, MyTextEdit
 
 
 class SpeedTest(QtWidgets.QWidget):
@@ -41,9 +41,14 @@ class SpeedTest(QtWidgets.QWidget):
         self.instructions.setFont(QFont('Arial', 20))
         self.instructions.setText(self.text)
         # text edit
-        self.text_edit = QtWidgets.QTextEdit(self)
         technique = EnhanceInput(self.word_list)
-        technique.set_auto_complete(self.text_edit)
+        # self.text_edit = QtWidgets.QTextEdit(self)
+        self.text_edit = MyTextEdit()
+        self.text_edit.setCompleter(technique)
+        # self.text_edit = QtWidgets.QLineEdit(self)
+        # technique.set_auto_complete(self.text_edit)
+        # self.text_edit.technique.setCompleter(technique)
+        # technique.set_auto_complete(self.text_edit)
         # layout
         layout = QVBoxLayout()
         layout.addWidget(self.instructions)
@@ -150,6 +155,7 @@ def main():
     text = get_text(sys.argv[1])
     speed_test = SpeedTest(text, sys.argv[2])
     sys.exit(app.exec())
+
 
 # extracts text from file
 def get_text(filename):
