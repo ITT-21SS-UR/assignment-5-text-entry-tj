@@ -1,153 +1,274 @@
-from PyQt5 import QtGui, QtWidgets, QtCore
+#!usr/bin/python
+
+import sys
+from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QCompleter
+from PyQt5.QtGui import QTextCursor, QFont
+from PyQt5.QtWidgets import QVBoxLayout, QCompleter
 
+# got ideas of these three links but mostly used the last one, cause it fitted our style the most, used logic is
+# in all three basically the same and was adjusted to fit our requirements
 # https://stackoverflow.com/questions/28956693/pyqt5-qtextedit-auto-completion
+# http://rowinggolfer.blogspot.com/2010/08/qtextedit-with-autocompletion-using.html
+# https://github.com/baoboa/pyqt5/blob/master/examples/tools/customcompleter/customcompleter.py
 
 
-class MyTextEdit(QtWidgets.QTextEdit):
-
-    def __init__(self,*args):
-        #*args to set parent
-        QtWidgets.QLineEdit.__init__(self,*args)
-        font= QtGui.QFont()
-        font.setPointSize(12)
-        self.setFont(font)
+# class implements input method (completer)
+class TextEdit(QtWidgets.QTextEdit):
+    # init all necessary variables
+    def __init__(self, speed_test, parent=None):
+        super(TextEdit, self).__init__(parent)
+        self.speed_test = speed_test
         self.completer = None
+        self.auto_completed = False
+        self.word = ''
+        self.extra = 0
+        self.sentence_count = 0
+        self.word_time = []
+        self.word = ""
+        self.sentence = ""
+        self.timer_sentence = QtCore.QTime()
+        self.timer_word = QtCore.QTime()
+        self.started = False
+        self.finished_word = False
 
-    def setCompleter(self, completer):
-        print('TADA')
-        if self.completer:
-            self.disconnect(self.completer, 0, self, 0)
-        if not completer:
+    # sets completer
+    def set_completer(self, c):
+        if self.completer is not None:
+            self.completer.activated.disconnect()
+        self.completer = c
+        c.setWidget(self)
+        c.setCompletionMode(QCompleter.PopupCompletion)
+        c.setCaseSensitivity(Qt.CaseInsensitive)
+        c.activated.connect(self.insert_completion)
+
+    # returns completer
+    def completer(self):
+        return self.completer
+
+    # returns index of current sentence
+    def get_sentence_count(self):
+        return self.sentence_count
+
+    def get_word_time(self):
+        return self.word_time
+
+    # inserts the missing piece of word
+    def insert_completion(self, completion):
+        if self.completer.widget() is not self:
             return
-
-        completer.setWidget(self)
-        completer.setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
-        completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
-        self.completer = completer
-#        self.connect(self.completer,
-#            QtCore.SIGNAL("activated(const QString&)"), self.insertCompletion)
-        self.completer.insertText.connect(self.insertCompletion)
-
-    def insertCompletion(self, completion):
         tc = self.textCursor()
-        extra = (len(completion) - len(self.completer.completionPrefix()))
-        tc.movePosition(QtGui.QTextCursor.Left)
-        tc.movePosition(QtGui.QTextCursor.EndOfWord)
-        tc.insertText(completion[-extra:])
+        extra = len(completion) - len(self.completer.completionPrefix())
+        tc.movePosition(QTextCursor.Left)
+        tc.movePosition(QTextCursor.EndOfWord)
+        if extra == 0:
+            tc.insertText('')
+        else:
+            tc.insertText(completion[-extra:])
         self.setTextCursor(tc)
+        self.auto_completed = True
+        self.word = completion
+        self.extra = len(completion) - extra
+        sys.stdout.write('Autocomplete: ' + completion + '\n')
 
-    def textUnderCursor(self):
+    # returns text which is already written
+    def text_under_cursor(self):
         tc = self.textCursor()
-        tc.select(QtGui.QTextCursor.WordUnderCursor)
+        tc.select(QTextCursor.WordUnderCursor)
         return tc.selectedText()
 
-    #---override
-    def focusInEvent(self, event):
-        if self.completer:
-            self.completer.setWidget(self);
-        QtWidgets.QTextEdit.focusInEvent(self, event)
+    # sets focus
+    def focusInEvent(self, e):
+        if self.completer is not None:
+            self.completer.setWidget(self)
+        super(TextEdit, self).focusInEvent(e)
 
-    #---override
-    def keyPressEvent(self, event):
-        if self.completer and self.completer.popup() and self.completer.popup().isVisible():
-            if event.key() in (
-            QtCore.Qt.Key_Enter,
-            QtCore.Qt.Key_Return,
-            QtCore.Qt.Key_Escape,
-            QtCore.Qt.Key_Tab,
-            QtCore.Qt.Key_Backtab):
-                event.ignore()
+    def keyPressEvent(self, e):
+        self.handle_input(e)
+        if self.completer is not None and self.completer.popup().isVisible():
+            # The following keys are forwarded by the completer to the widget.
+            if e.key() in (Qt.Key_Enter, Qt.Key_Escape, Qt.Key_Tab, Qt.Key_Backtab):
+                e.ignore()
+                # Let the completer do default behavior.
                 return
-        ## has ctrl-Space been pressed??
-        print(event.modifiers())
-        print(QtCore.Qt.ControlModifier)
-
-        isShortcut = (event.modifiers() == QtCore.Qt.ControlModifier and event.key() == QtCore.Qt.Key_S)
-        ## modifier to complete suggestion inline ctrl-e
-        inline = (event.modifiers() == QtCore.Qt.ControlModifier and event.key() == QtCore.Qt.Key_E)
-        ## if inline completion has been chosen
-        if inline:
-            # set completion mode as inline
-            self.completer.setCompletionMode(QtWidgets.QCompleter.InlineCompletion)
-            completionPrefix = self.textUnderCursor()
-            if (completionPrefix != self.completer.completionPrefix()):
-                self.completer.setCompletionPrefix(completionPrefix)
-            self.completer.complete()
-#            self.completer.setCurrentRow(0)
-#            self.completer.activated.emit(self.completer.currentCompletion())
-            # set the current suggestion in the text box
-            self.completer.insertText.emit(self.completer.currentCompletion())
-            # reset the completion mode
-            self.completer.setCompletionMode(QtWidgets.QCompleter.PopupCompletion)
+        # use <TAB> to get a auto-complete suggestion
+        is_shortcut = ((e.modifiers() & Qt.ControlModifier) != 0 and e.key() == Qt.Key_Tab)
+        if self.completer is None or not is_shortcut:
+            # Do not process the shortcut when we have a completer.
+            super(TextEdit, self).keyPressEvent(e)
+        if self.completer is None:
             return
-        if (not self.completer or not isShortcut):
-        # if not self.completer:
-            print("here")
-            pass
-            QtWidgets.QTextEdit.keyPressEvent(self, event)
-        # debug
-#        print("After controlspace")
-#        print("isShortcut is: {}".format(isShortcut))
-        # debug over
-        ## ctrl or shift key on it's own??
-        ctrlOrShift = event.modifiers() in (QtCore.Qt.ControlModifier , QtCore.Qt.ShiftModifier)
-        if ctrlOrShift and event.text() == '':
-            print('hello')
-#             ctrl or shift key on it's own
+        completion_prefix = self.text_under_cursor()
+        if not is_shortcut and (len(e.text()) == 0 or len(completion_prefix) < 3):
+            self.completer.popup().hide()
             return
-        # debug
-#        print("After on its own")
-#        print("isShortcut is: {}".format(isShortcut))
-        # debug over
-#         eow = QtCore.QString("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=") #end of word
-#        eow = "~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-=" #end of word
-        eow = "~!@#$%^&*+{}|:\"<>?,./;'[]\\-=" #end of word
-
-        hasModifier = ((event.modifiers() != QtCore.Qt.NoModifier) and not ctrlOrShift)
-
-        completionPrefix = self.textUnderCursor()
-#         print('event . text = {}'.format(event.text().right(1)))
-#         if (not isShortcut and (hasModifier or event.text()=='' or\
-#                                 len(completionPrefix) < 3 or \
-#                                 eow.contains(event.text().right(1)))):
-        if not isShortcut :
-            if self.completer.popup():
-                self.completer.popup().hide()
-            return
-#        print("complPref: {}".format(completionPrefix))
-#        print("completer.complPref: {}".format(self.completer.completionPrefix()))
-#        print("mode: {}".format(self.completer.completionMode()))
-#        if (completionPrefix != self.completer.completionPrefix()):
-        self.completer.setCompletionPrefix(completionPrefix)
-        popup = self.completer.popup()
-        popup.setCurrentIndex(
-            self.completer.completionModel().index(0,0))
+        if completion_prefix != self.completer.completionPrefix():
+            self.completer.setCompletionPrefix(completion_prefix)
+            self.completer.popup().setCurrentIndex(self.completer.completionModel().index(0, 0))
         cr = self.cursorRect()
-        cr.setWidth(self.completer.popup().sizeHintForColumn(0)
-            + self.completer.popup().verticalScrollBar().sizeHint().width())
-        self.completer.complete(cr) ## popup it up!
+        cr.setWidth(self.completer.popup().sizeHintForColumn(0) +
+                    self.completer.popup().verticalScrollBar().sizeHint().width())
+        self.completer.complete(cr)
+
+    # handles the input and gets data for logging
+    def handle_input(self, event):
+        letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                   't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü']
+        # when a sentence has not yet begun
+        if not self.started:
+            self.started = True
+            self.start_time_sentence()
+            self.start_time_word()
+            self.sentence_count += 1
+            self.word_time = []
+        # when a word is finished
+        if self.finished_word:
+            self.start_time_word()
+            self.finished_word = False
+        # when the sentence has started
+        if self.started:
+            if event.text() in letters:
+                self.word += event.text()
+                self.sentence += event.text()
+                sys.stdout.write('Key pressed: ' + str(event.text()) + '\n')
+            elif event.key() == QtCore.Qt.Key.Key_Space:
+                self.word_time.append(self.stop_time_word())
+                if self.auto_completed:
+                    self.auto_completed = False
+                    self.sentence = self.sentence[:-self.extra]
+                    self.sentence += self.word
+                sys.stdout.write('Key pressed: Space \n')
+                sys.stdout.write('Word typed: ' + self.word + '\n')
+                self.sentence += ' '
+                self.word = ""
+                self.finished_word = True
+            elif event.key() == QtCore.Qt.Key.Key_Return:
+                self.word_time.append(self.stop_time_word())
+                if self.auto_completed:
+                    self.auto_completed = False
+                    self.sentence = self.sentence[:-self.extra]
+                    self.sentence += self.word
+                sys.stdout.write('Key pressed: Enter \n')
+                sys.stdout.write('Word typed: ' + self.word + '\n')
+                self.word = ""
+                sys.stdout.write('Sentence typed: ' + self.sentence + '\n')
+                self.sentence = ""
+                self.speed_test.log_data()
+                self.started = False
+                if self.sentence_count == self.speed_test.get_num_sentences():
+                    sys.stdout.write('Test finished')
+                    sys.exit(1)
+            elif event.key() == QtCore.Qt.Key.Key_Backspace:
+                sys.stdout.write('Key pressed: Delete \n')
+                self.word = self.word[:-1]
+                self.sentence = self.sentence[:-1]
+
+    # start timer for sentence
+    def start_time_sentence(self):
+        self.timer_sentence.start()
+
+    # stops timer for sentence
+    def stop_time_sentence(self):
+        elapsed = self.timer_sentence.elapsed()
+        return elapsed
+
+    # starts timer for word
+    def start_time_word(self):
+        self.timer_word.start()
+
+    # stops timer for word
+    def stop_time_word(self):
+        elapsed = self.timer_word.elapsed()
+        return elapsed
 
 
-class EnhanceInput(QtWidgets.QCompleter):
+# class for logging and setup
+class SpeedTest(QtWidgets.QWidget):
 
-    insertText = QtCore.pyqtSignal(str)
+    # init all necessary variables
+    def __init__(self, text, participant_id):
+        super(SpeedTest, self).__init__()
+        self.text = text
+        self.id = participant_id
+        self.word_list = self.text.replace('\n', ' ').lower().split(' ')
+        self.sentence_list = self.text.split('\n')
+        self.num_sentences = len(self.sentence_list)
+        self.init_ui()
+        sys.stdout.write("timestamp_ISO,id,sentence_count,sentence_length,sentence_time_in_ms,"
+                         "word_count,avg_word_length,avg_word_time_in_ms,words_per_minute\n")
 
-    def __init__(self, word_list):
-        super(EnhanceInput, self).__init__()
-        self.word_list = word_list
-        # self.connect(self, QtCore.SIGNAL("activated(const QString&)"), self.changeCompletion)
+    # init interface
+    def init_ui(self):
+        self.showMaximized()
+        self.setWindowTitle('Speed Test')
+        self.setFocusPolicy(QtCore.Qt.StrongFocus)
+        # display text to be written
+        self.instructions = QtWidgets.QLabel(self)
+        self.instructions.setAlignment(QtCore.Qt.AlignCenter)
+        self.instructions.setFont(QFont('Arial', 20))
+        self.instructions.setText(self.text)
+        # text edit with completer
+        self.text_edit = TextEdit(self)
+        self.completer = QCompleter(self.word_list)
+        self.completer.setCaseSensitivity(QtCore.Qt.CaseInsensitive)
+        self.completer.setWrapAround(False)
+        self.text_edit.set_completer(self.completer)
+        # layout
+        layout = QVBoxLayout()
+        layout.addWidget(self.instructions)
+        layout.addWidget(self.text_edit)
+        self.setLayout(layout)
+        self.show()
 
-    def changeCompletion(self, completion):
-        if completion.find("(") != -1:
-            completion = completion[:completion.find("(")]
-        print(completion)
-        self.insertText.emit(completion)
+    # logs test data
+    def log_data(self):
+        timestamp = QtCore.QDateTime.currentDateTime().toString(QtCore.Qt.ISODate)
+        word_count, avg_word_len, avg_word_time = self.analyze_sentence(self.text_edit.get_sentence_count())
+        sentence_length = len(self.sentence_list[self.text_edit.get_sentence_count()-1])
+        sentence_time = self.text_edit.stop_time_sentence()
+        wpm = self.words_per_minute(sentence_length, sentence_time, avg_word_len)
+        sys.stdout.write("%s,%s,%d,%d,%d,%d,%d,%d,%d\n" %
+                         (timestamp, self.id, self.text_edit.get_sentence_count(), sentence_length, sentence_time,
+                          word_count, avg_word_len, avg_word_time, wpm))
 
-    def set_auto_complete(self, edit_text):
-        completer = QCompleter(self.word_list)
-        completer.setCaseSensitivity(Qt.CaseInsensitive)
-        edit_text.setCompleter(completer)
-        print('hallo')
+    # analyzes current sentence
+    def analyze_sentence(self, num):
+        sentence = self.sentence_list[num - 1]
+        word_count = len(sentence.split(' '))
+        avg_word_len = len(sentence.replace(' ', '')) / word_count
+        time = 0
+        for i in self.text_edit.get_word_time():
+            time += i
+        avg_word_time = time / word_count
+        return word_count, avg_word_len, avg_word_time
 
+    # calculates word per minute
+    def words_per_minute(self, sentence_len, sentence_time, avg_word_length):
+        return ((sentence_len/(sentence_time/1000))*60)/avg_word_length
+
+    # returns the amount of sentences
+    def get_num_sentences(self):
+        return self.num_sentences
+
+
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    if len(sys.argv) < 3:
+        sys.stderr.write("Need .txt file with text to be written and an participant id")
+        sys.exit(1)
+    text = get_text(sys.argv[1])
+    speed_test = SpeedTest(text, sys.argv[2])
+    sys.exit(app.exec())
+
+
+# extracts text from file
+def get_text(filename):
+    text = ""
+    file = open(filename).readlines()
+    for i in file:
+        text += i
+    return text
+
+
+if __name__ == '__main__':
+    main()
