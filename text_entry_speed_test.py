@@ -1,11 +1,9 @@
 #!/usr/bin/python
 
 import sys
-from PyQt5 import QtGui, QtCore, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout
-
-from text_input_technique import EnhanceInput, MyTextEdit
 
 
 class SpeedTest(QtWidgets.QWidget):
@@ -15,7 +13,7 @@ class SpeedTest(QtWidgets.QWidget):
         super(SpeedTest, self).__init__()
         self.text = text
         self.id = participant_id
-        self.word_list = self.text.replace('\n', ' ').split(' ')
+        self.word_list = self.text.replace('\n', ' ').lower().split(' ')
         self.sentence_count = 0
         self.sentence_list = self.text.split('\n')
         self.num_sentences = len(self.sentence_list)
@@ -41,14 +39,7 @@ class SpeedTest(QtWidgets.QWidget):
         self.instructions.setFont(QFont('Arial', 20))
         self.instructions.setText(self.text)
         # text edit
-        technique = EnhanceInput(self.word_list)
-        # self.text_edit = QtWidgets.QTextEdit(self)
-        self.text_edit = MyTextEdit()
-        self.text_edit.setCompleter(technique)
-        # self.text_edit = QtWidgets.QLineEdit(self)
-        # technique.set_auto_complete(self.text_edit)
-        # self.text_edit.technique.setCompleter(technique)
-        # technique.set_auto_complete(self.text_edit)
+        self.text_edit = QtWidgets.QTextEdit(self)
         # layout
         layout = QVBoxLayout()
         layout.addWidget(self.instructions)
@@ -83,6 +74,7 @@ class SpeedTest(QtWidgets.QWidget):
         return ((sentence_len/(sentence_time/1000))*60)/avg_word_length
 
     # handles event when key is released
+    # use key release, because the press event is focused on the edit text
     def keyReleaseEvent(self, event):
         letters = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
                    't', 'u', 'v', 'w', 'x', 'y', 'z', 'ä', 'ö', 'ü']
