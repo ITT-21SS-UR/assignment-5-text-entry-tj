@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import QVBoxLayout, QCompleter
 # http://rowinggolfer.blogspot.com/2010/08/qtextedit-with-autocompletion-using.html
 # https://github.com/baoboa/pyqt5/blob/master/examples/tools/customcompleter/customcompleter.py
 
+# the workload was distributed evenly between the two team members
+
 
 # class implements input method (completer)
 class TextEdit(QtWidgets.QTextEdit):
@@ -190,7 +192,7 @@ class SpeedTest(QtWidgets.QWidget):
         super(SpeedTest, self).__init__()
         self.text = text
         self.id = participant_id
-        self.word_list = self.text.replace('\n', ' ').lower().split(' ')
+        self.word_list = list(set(self.text.replace('\n', ' ').lower().split(' ')))
         self.sentence_list = self.text.split('\n')
         self.num_sentences = len(self.sentence_list)
         self.init_ui()

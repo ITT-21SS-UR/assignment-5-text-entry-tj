@@ -5,6 +5,8 @@ from PyQt5 import QtCore, QtWidgets
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QVBoxLayout
 
+# the workload was distributed evenly between the two team members
+
 
 class SpeedTest(QtWidgets.QWidget):
 
