@@ -1,0 +1,26 @@
+Design and Analysis of Intelligent Text Entry Systems with Function Structure Models and Envelope Analysis
+
+The study deals with the topic of intelligent, interactive text entry systems and the problem, that HCI designs are difficult to design and evaluate. Therefore, a new option was implemented in which function structures are used. The advantage of these function structures is that the input can be presented by parameters and then evaluated with envelope analysis. In this study they used function structure models on predictive text entry with the aim to investigate the costs and benefits, the  aspects of language models and how all this affects the design of the text prediction system and when the predictions proved an advantage over normal typing. In summary, a system was developed to evaluate text input systems and explore the design space of text entry, this can help developers to identify and evaluate important points of their systems and explore their usefulness in studies.
+
+
+Hummer: Text Entry by Gaze and Hum
+
+This paper dealt with text entry by gaze (EyeSwipe), for example for interactions when you don't have your hands free and can’t use voice recognition due to various reasons and text entry by humming. Therefore they implemented two systems combining gaze and humming and compared them in later study. In the first system (Hummer), the subject must hum continuously while entering a word, looking from letter to letter. The second system (HumHum) is similar, but a hum at the beginning and end signals the beginning and end of the word. In conclusion Hummer is the fastest s system with 15.48 WPM, HumHum had a rate of 12.55 WPM and EyeSwipe 10.35 WPM.
+
+
+Facilitating Text Entry on Smartphones with QWERTY Keyboard for Users with Parkinson’s Disease
+
+Almost every mobile phone has a QWERTY/QWERTZ keyboard, but text entry there is much more difficult for people suffering from conditions such as Parkinson's and hand tremor. Therefore, this study investigated the text entry method on mobile phones of people with Parkinson and compared it to people without Parkinson. Then they used an elastic probabilistic model to predict the user input with various input errors for offering input predications, as most input suggestions can only handle certain errors. In the third part they tested their founding’s in an in-lab study against baseline techniques in an user evaluation study. In conclusion they found out that their technique outperforms baseline techniques in terms of errors and input speed ant therefore makes it easier for people with Parkinson and hand tremors to write on their mobile phone
+
+
+
+Literature:
+
+Text 1:
+Per Ola Kristensson and Thomas Müllners. 2021. Design and Analysis of Intelligent Text Entry Systems with Function Structure Models and Envelope Analysis. In Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems (CHI '21). Association for Computing Machinery, New York, NY, USA, Article 584, 1–12. DOI :https://doi.org/10.1145/3411764.3445566
+
+Text 2:
+Ramin Hedeshy, Chandan Kumar, Raphael Menges, and Steffen Staab. 2021. Hummer: Text Entry by Gaze and Hum. In Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems (CHI '21). Association for Computing Machinery, New York, NY, USA, Article 741, 1–11. DOI: https://doi.org/10.1145/3411764.3445501
+
+Text 3:
+Yuntao Wang, Ao Yu, Xin Yi, Yuanwei Zhang, Ishan Chatterjee, Shwetak Patel, and Yuanchun Shi. 2021. Facilitating Text Entry on Smartphones with QWERTY Keyboard for Users with Parkinson’s Disease. In Proceedings of the 2021 CHI Conference on Human Factors in Computing Systems (CHI '21). Association for Computing Machinery, New York, NY, USA, Article 735, 1–12. DOI: https://doi.org/10.1145/3411764.3445352

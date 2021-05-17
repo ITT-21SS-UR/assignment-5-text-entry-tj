@@ -71,7 +71,7 @@ class TextEdit(QtWidgets.QTextEdit):
         self.auto_completed = True
         self.word = completion
         self.extra = len(completion) - extra
-        sys.stdout.write('Autocomplete: ' + completion + '\n')
+        #sys.stdout.write('Autocomplete: ' + completion + '\n')
 
     # returns text which is already written
     def text_under_cursor(self):
@@ -132,15 +132,15 @@ class TextEdit(QtWidgets.QTextEdit):
             if event.text() in letters:
                 self.word += event.text()
                 self.sentence += event.text()
-                sys.stdout.write('Key pressed: ' + str(event.text()) + '\n')
+                #sys.stdout.write('Key pressed: ' + str(event.text()) + '\n')
             elif event.key() == QtCore.Qt.Key.Key_Space:
                 self.word_time.append(self.stop_time_word())
                 if self.auto_completed:
                     self.auto_completed = False
                     self.sentence = self.sentence[:-self.extra]
                     self.sentence += self.word
-                sys.stdout.write('Key pressed: Space \n')
-                sys.stdout.write('Word typed: ' + self.word + '\n')
+                #sys.stdout.write('Key pressed: Space \n')
+                #sys.stdout.write('Word typed: ' + self.word + '\n')
                 self.sentence += ' '
                 self.word = ""
                 self.finished_word = True
@@ -150,18 +150,18 @@ class TextEdit(QtWidgets.QTextEdit):
                     self.auto_completed = False
                     self.sentence = self.sentence[:-self.extra]
                     self.sentence += self.word
-                sys.stdout.write('Key pressed: Enter \n')
-                sys.stdout.write('Word typed: ' + self.word + '\n')
+                #sys.stdout.write('Key pressed: Enter \n')
+                #sys.stdout.write('Word typed: ' + self.word + '\n')
                 self.word = ""
-                sys.stdout.write('Sentence typed: ' + self.sentence + '\n')
+                #sys.stdout.write('Sentence typed: ' + self.sentence + '\n')
                 self.sentence = ""
                 self.speed_test.log_data()
                 self.started = False
                 if self.sentence_count == self.speed_test.get_num_sentences():
-                    sys.stdout.write('Test finished')
+                    #sys.stdout.write('Test finished')
                     sys.exit(1)
             elif event.key() == QtCore.Qt.Key.Key_Backspace:
-                sys.stdout.write('Key pressed: Delete \n')
+                #sys.stdout.write('Key pressed: Delete \n')
                 self.word = self.word[:-1]
                 self.sentence = self.sentence[:-1]
 

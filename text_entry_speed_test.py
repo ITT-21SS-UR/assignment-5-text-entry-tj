@@ -96,29 +96,29 @@ class SpeedTest(QtWidgets.QWidget):
             if event.text() in letters:
                 self.word += event.text()
                 self.sentence += event.text()
-                sys.stdout.write('Key pressed: ' + str(event.text()) + '\n')
+                #sys.stdout.write('Key pressed: ' + str(event.text()) + '\n')
             elif event.key() == QtCore.Qt.Key.Key_Space:
                 self.word_time.append(self.stop_time_word())
-                sys.stdout.write('Key pressed: Space \n')
-                sys.stdout.write('Word typed: ' + self.word + '\n')
+                #sys.stdout.write('Key pressed: Space \n')
+                #sys.stdout.write('Word typed: ' + self.word + '\n')
                 self.sentence += ' '
                 self.word = ""
                 self.finished_word = True
             elif event.key() == QtCore.Qt.Key.Key_Return:
                 self.word_time.append(self.stop_time_word())
-                sys.stdout.write('Key pressed: Enter \n')
-                sys.stdout.write('Word typed: ' + self.word + '\n')
+                #sys.stdout.write('Key pressed: Enter \n')
+                #sys.stdout.write('Word typed: ' + self.word + '\n')
                 self.word = ""
-                sys.stdout.write('Sentence typed: ' + self.sentence + '\n')
+                #sys.stdout.write('Sentence typed: ' + self.sentence + '\n')
                 self.sentence = ""
                 self.log_data()
                 self.started = False
                 if self.sentence_count == self.num_sentences:
-                    sys.stdout.write('Test finished')
+                    #sys.stdout.write('Test finished')
                     # sys.stderr.write("Finished!")
                     sys.exit(1)
             elif event.key() == QtCore.Qt.Key.Key_Backspace:
-                sys.stdout.write('Key pressed: Delete \n')
+                #sys.stdout.write('Key pressed: Delete \n')
                 self.word = self.word[:-1]
                 self.sentence = self.sentence[:-1]
 
